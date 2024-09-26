@@ -3,12 +3,12 @@ package org.javacs.kt.classpath
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.function.BiPredicate
-import org.javacs.kt.util.tryResolving
+import kotlin.math.min
 import org.javacs.kt.util.findCommandOnPath
-import org.javacs.kt.LOG
-import java.nio.file.Paths
+import org.javacs.kt.util.tryResolving
 
 /** Backup classpath that find Kotlin in the user's Maven/Gradle home or kotlinc's libraries folder. */
 object BackupClassPathResolver : ClassPathResolver {
@@ -17,8 +17,8 @@ object BackupClassPathResolver : ClassPathResolver {
 }
 
 fun findKotlinStdlib(): Path? =
-    findKotlinCliCompilerLibrary("kotlin-stdlib")
-    ?: findLocalArtifact("org.jetbrains.kotlin", "kotlin-stdlib")
+    findLocalArtifact("org.jetbrains.kotlin", "kotlin-stdlib")
+    ?: findKotlinCliCompilerLibrary("kotlin-stdlib")
     ?: findAlternativeLibraryLocation("kotlin-stdlib")
 
 private fun findLocalArtifact(group: String, artifact: String) =
@@ -41,11 +41,7 @@ private fun tryFindingLocalArtifactUsing(@Suppress("UNUSED_PARAMETER") group: St
         .sorted(::compareVersions)
         .findFirst()
         .orElse(null)
-        ?.let {
-            Files.find(artifactDirResolution.artifactDir, 3, isCorrectArtifact)
-                .findFirst()
-                .orElse(null)
-        }
+        ?.let { Files.find(artifactDirResolution.artifactDir, 3, isCorrectArtifact).findFirst().orElse(null) }
 }
 
 private data class LocalArtifactDirectoryResolution(val artifactDir: Path?, val buildTool: String)
@@ -70,9 +66,6 @@ private fun findKotlinCliCompilerLibrary(name: String): Path? =
         ?.filter { it.fileName.toString() == "$name.jar" }
         ?.findFirst()
         ?.orElse(null)
-        ?.also {
-            LOG.info("Found Kotlin CLI compiler library $name at $it")
-        }
 
 
 // alternative library locations like for snap
@@ -109,7 +102,7 @@ private fun compareVersions(left: Path, right: Path): Int {
     val leftVersion = extractVersion(left)
     val rightVersion = extractVersion(right)
 
-    for (i in 0 until Math.min(leftVersion.size, rightVersion.size)) {
+    for (i in 0 until min(leftVersion.size, rightVersion.size)) {
         val leftRev = leftVersion[i].reversed()
         val rightRev = rightVersion[i].reversed()
         val compare = leftRev.compareTo(rightRev)
@@ -120,5 +113,5 @@ private fun compareVersions(left: Path, right: Path): Int {
     return -leftVersion.size.compareTo(rightVersion.size)
 }
 private fun extractVersion(artifactVersionDir: Path): List<String> {
-    return artifactVersionDir.toString().split(".")
+    return artifactVersionDir.fileName.toString().split(".")
 }

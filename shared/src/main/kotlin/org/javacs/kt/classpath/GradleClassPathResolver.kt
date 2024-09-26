@@ -42,7 +42,7 @@ internal class GradleClassPathResolver(
 
     companion object {
         /** Create a Gradle resolver if a file is a pom. */
-        fun maybeCreate(file: Path, options: ResolverOptions): GradleClassPathResolver? =
+        fun maybeCreate(file: Path, options: DefaultClassPathResolver): GradleClassPathResolver? =
             file.takeIf { file.endsWith("build.gradle") || file.endsWith("build.gradle.kts") }
                 ?.let {
                     GradleClassPathResolver(
