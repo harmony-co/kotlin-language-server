@@ -16,8 +16,8 @@ detekt {
     allRules = false // activate all available (even unstable) rules.
     buildUponDefaultConfig = true // preconfigure defaults
     parallel = true
-    config = files("$rootDir/detekt.yml")
-    baseline = file("$rootDir/detekt_baseline.xml")
+    config = files("$projectDir/detekt.yml")
+    baseline = file("$projectDir/detekt_baseline.xml")
     source = files(projectDir)
 }
 
@@ -37,8 +37,8 @@ tasks.register<DetektCreateBaselineTask>("createDetektBaseline") {
     ignoreFailures.set(true)
     parallel.set(true)
     setSource(files(projectDir))
-    config.setFrom(files("$rootDir/detekt.yml"))
-    baseline.set(file("$rootDir/detekt_baseline.xml"))
+    config.setFrom(files("$projectDir/detekt.yml"))
+    baseline.set(file("$projectDir/detekt_baseline.xml"))
     include("**/*.kt")
     include("**/*.kts")
     exclude("**/build/**")
