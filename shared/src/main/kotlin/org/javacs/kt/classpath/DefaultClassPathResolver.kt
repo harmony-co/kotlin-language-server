@@ -6,23 +6,23 @@ import java.nio.file.Path
 import java.nio.file.PathMatcher
 import java.nio.file.FileSystems
 
-data class ResolverOptions(
+data class DefaultClassPathResolver(
     // Whether to use the compile classpath or the runtime classpath during classpath resolution
     val useCompileClasspath: Boolean,
 ) {
     companion object {
-        fun default(): ResolverOptions {
-            return ResolverOptions(useCompileClasspath = true)
+        fun default(): DefaultClassPathResolver {
+            return DefaultClassPathResolver(useCompileClasspath = true)
         }
     }
 }
 
-val DefaultResolverOptions = ResolverOptions.default()
+val DefaultResolverOptions = DefaultClassPathResolver.default()
 
 fun defaultClassPathResolver(
     workspaceRoots: Collection<Path>,
     db: Database? = null,
-    resolverOptions: ResolverOptions = DefaultResolverOptions,
+    resolverOptions: DefaultClassPathResolver = DefaultResolverOptions,
 ): ClassPathResolver {
     val childResolver = WithStdlibResolver(
         ShellClassPathResolver.global(workspaceRoots.firstOrNull())
@@ -33,13 +33,13 @@ fun defaultClassPathResolver(
 }
 
 /** Searches the workspace for all files that could provide classpath info. */
-private fun workspaceResolvers(workspaceRoot: Path, resolverOptions: ResolverOptions): Sequence<ClassPathResolver> {
+private fun workspaceResolvers(workspaceRoot: Path, resolverOptions: DefaultClassPathResolver): Sequence<ClassPathResolver> {
     val ignored: List<PathMatcher> = ignoredPathPatterns(workspaceRoot, workspaceRoot.resolve(".gitignore"))
     return folderResolvers(workspaceRoot, ignored, resolverOptions).asSequence()
 }
 
 /** Searches the folder for all build-files. */
-private fun folderResolvers(root: Path, ignored: List<PathMatcher>, resolverOptions: ResolverOptions): Collection<ClassPathResolver> =
+private fun folderResolvers(root: Path, ignored: List<PathMatcher>, resolverOptions: DefaultClassPathResolver): Collection<ClassPathResolver> =
     root.toFile()
         .walk()
         .onEnter { file -> ignored.none { it.matches(file.toPath()) } }
@@ -68,7 +68,7 @@ private fun ignoredPathPatterns(root: Path, gitignore: Path): List<PathMatcher> 
         ?: emptyList()
 
 /** Tries to create a classpath resolver from a file using as many sources as possible */
-private fun asClassPathProvider(path: Path, resolverOptions: ResolverOptions): ClassPathResolver? =
+private fun asClassPathProvider(path: Path, resolverOptions: DefaultClassPathResolver): ClassPathResolver? =
     MavenClassPathResolver.maybeCreate(path)
         ?: GradleClassPathResolver.maybeCreate(path, resolverOptions)
         ?: ShellClassPathResolver.maybeCreate(path)
