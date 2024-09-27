@@ -1,0 +1,4 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    "kotlin.languageServer.path": "server/build/install/server/bin/kotlin-language-server",
+}
