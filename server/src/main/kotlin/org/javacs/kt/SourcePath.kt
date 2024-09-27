@@ -250,15 +250,19 @@ class SourcePath(
         return CompositeBindingContext.create(combined)
     }
 
-    fun compileAllFiles() {
-        // TODO: Investigate the possibility of compiling all files at once, instead of iterating here
-        // At the moment, compiling all files at once sometimes leads to an internal error from the TopDownAnalyzer
-        files.keys.forEach {
-            // If one of the files fails to compile, we compile the others anyway
-            try {
-                compileFiles(listOf(it))
-            } catch (ex: Exception) {
-                LOG.printStackTrace(ex)
+        fun compileAllFiles() {
+        try {
+            // Attempt to compile all files at once
+            compileFiles(files.keys.toList())
+        } catch (ex: Exception) {
+            // If an internal error occurs, fall back to compiling files individually
+            LOG.printStackTrace(ex)
+            files.keys.forEach {
+                try {
+                    compileFiles(listOf(it))
+                } catch (ex: Exception) {
+                    LOG.printStackTrace(ex)
+                }
             }
         }
     }
@@ -290,6 +294,7 @@ class SourcePath(
     }
 
     fun refreshDependencyIndexes() {
+        compileAllFiles()
         val module = files.values.first { it.module != null }.module
         if (module != null) {
             refreshDependencyIndexes(module)
