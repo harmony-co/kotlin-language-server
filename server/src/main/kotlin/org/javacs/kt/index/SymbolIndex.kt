@@ -85,15 +85,14 @@ class SymbolIndex(
     private val databaseService: DatabaseService
 ) {
     private val db: Database by lazy {
-        val db = databaseService.db ?: Database.connect("jdbc:h2:mem:symbolindex;DB_CLOSE_DELAY=-1", "org.h2.Driver")
+        databaseService.db ?: Database.connect("jdbc:h2:mem:symbolindex;DB_CLOSE_DELAY=-1", "org.h2.Driver")
+    }
+    var progressFactory: Progress.Factory = Progress.Factory.None
+    init {
         transaction(db) {
             SchemaUtils.createMissingTablesAndColumns(Symbols, Locations, Ranges, Positions)
         }
-        db
     }
-
-    var progressFactory: Progress.Factory = Progress.Factory.None
-
     /** Rebuilds the entire index. May take a while. */
     fun refresh(module: ModuleDescriptor, exclusions: Sequence<DeclarationDescriptor>) {
         val started = System.currentTimeMillis()
