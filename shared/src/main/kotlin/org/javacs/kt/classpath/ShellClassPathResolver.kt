@@ -35,17 +35,17 @@ internal class ShellClassPathResolver(
         private val scriptExtensions = if (isOSWindows()) listOf(".bat", ".cmd", ".ps1") else listOf("", ".sh", ".bash")
 
         /** Create a shell resolver if a file is a pom. */
-        fun maybeCreate(file: Path): ShellClassPathResolver? =
-            file.takeIf { scriptNames.any { name -> scriptExtensions.any { file.endsWith("$name$it") } } }
-                ?.takeIf {
-                    val isExecutable = Files.isExecutable(it)
-                    if (!isExecutable) {
-                        LOG.warn("Found classpath script $it that is NOT executable and therefore cannot be used. Perhaps you'd want to chmod +x it?")
-                    }
-                    isExecutable
+        fun maybeCreate(file: Path): ShellClassPathResolver? {
+            if (scriptNames.any { file.fileName.toString().endsWith(it) }) {
+                if (Files.isExecutable(file)) {
+                    LOG.info("Found shell script {}", file)
+                    return ShellClassPathResolver(file)
+                } else {
+                    LOG.warn("Found classpath script $file that is NOT executable and therefore cannot be used. Perhaps you'd want to chmod +x it?")
                 }
-                ?.let { ShellClassPathResolver(it) }
-
+            }
+            return null
+        }
         /** The root directory for config files. */
         private val globalConfigRoot: Path =
             System.getenv("XDG_CONFIG_HOME")?.let { Paths.get(it) } ?: userHome.resolve(".config")
