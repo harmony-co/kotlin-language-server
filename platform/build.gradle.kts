@@ -38,5 +38,6 @@ dependencies {
         api("org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlinVersion")
         api("org.openjdk.jmh:jmh-generator-annprocess:1.20")
         api("org.xerial:sqlite-jdbc:3.41.2.1")
+        api("com.google.guava:guava:33.3.1-jre")
     }
 }

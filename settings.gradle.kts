@@ -23,6 +23,7 @@ pluginManagement {
         kotlin("jvm") version "2.0.20" apply false // Updated version here
         id("com.github.jk1.tcdeps") version "1.2" apply false
         id("com.jaredsburrows.license") version "0.8.42" apply false
+        id("com.google.guava") version "33.3.1-jre" apply false
     }
 }
 
