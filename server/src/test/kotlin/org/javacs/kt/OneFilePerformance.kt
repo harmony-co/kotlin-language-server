@@ -36,7 +36,7 @@ class OneFilePerformance {
         internal var config = CompilerConfiguration()
         init {
             config.put(CommonConfigurationKeys.MODULE_NAME, JvmProtoBufUtil.DEFAULT_MODULE_NAME)
-            config.put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, LoggingMessageCollector)
+            config.put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, LoggingMessageCollector)
         }
         internal val disposable = Disposer.newDisposable()
         internal var env = KotlinCoreEnvironment.createForProduction(
@@ -53,7 +53,7 @@ class OneFilePerformance {
         }
 
         internal fun compile(compile: Collection<KtFile>, sourcePath: Collection<KtFile>): BindingTraceContext {
-            val trace = CliBindingTrace()
+            val trace = CliBindingTrace(env.project)
             val container = CompilerFixtures.createContainer(
                 env.project,
                 sourcePath,

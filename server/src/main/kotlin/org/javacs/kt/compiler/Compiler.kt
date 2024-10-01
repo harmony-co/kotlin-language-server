@@ -99,8 +99,7 @@ private class CompilationEnvironment(
 
     init {
         environment = KotlinCoreEnvironment.createForProduction(
-            parentDisposable = disposable,
-            // Not to be confused with the CompilerConfiguration in the language server Configuration
+            projectDisposable = disposable,
             configuration = KotlinCompilerConfiguration().apply {
                 val langFeatures = mutableMapOf<LanguageFeature, LanguageFeature.State>()
                 for (langFeature in LanguageFeature.values()) {
@@ -423,7 +422,7 @@ private class CompilationEnvironment(
     }
 
     fun createContainer(sourcePath: Collection<KtFile>): Pair<ComponentProvider, BindingTraceContext> {
-        val trace = CliBindingTrace()
+        val trace = CliBindingTrace(environment.project)
         val container = TopDownAnalyzerFacadeForJVM.createContainer(
             project = environment.project,
             files = sourcePath,

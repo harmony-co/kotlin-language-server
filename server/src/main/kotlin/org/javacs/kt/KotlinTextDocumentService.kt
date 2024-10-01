@@ -61,9 +61,6 @@ class KotlinTextDocumentService(
     private val TextDocumentIdentifier.filePath: Path?
         get() = parseURI(uri).filePath
 
-    private val TextDocumentIdentifier.isKotlinScript: Boolean
-        get() = uri.endsWith(".kts")
-
     private val TextDocumentIdentifier.content: String
         get() = sp.content(parseURI(uri))
 

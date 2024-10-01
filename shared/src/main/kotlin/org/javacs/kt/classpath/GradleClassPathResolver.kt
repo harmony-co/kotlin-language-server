@@ -128,7 +128,6 @@ private fun findGradleCLIDependencies(command: List<String>, projectDirectory: P
 }
 
 private val artifactPattern by lazy { "kotlin-lsp-gradle (.+)(?:\r?\n)".toRegex() }
-private val gradleErrorWherePattern by lazy { "\\*\\s+Where:[\r\n]+(\\S\\.*)".toRegex() }
 
 private fun parseGradleCLIDependencies(output: String): Set<Path>? {
     LOG.debug(output)

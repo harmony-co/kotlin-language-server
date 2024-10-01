@@ -15,8 +15,8 @@ package org.javacs.kt.util
  * @param maxOffset The number of characters to search for matching letters
  */
 fun stringDistance(candidate: CharSequence, pattern: CharSequence, maxOffset: Int = 4): Int = when {
-    candidate.length == 0 -> pattern.length
-    pattern.length == 0 -> candidate.length
+    candidate.isEmpty() -> pattern.length
+    pattern.isEmpty() -> candidate.length
     else -> {
         val candidateLength = candidate.length
         val patternLength = pattern.length
@@ -32,8 +32,8 @@ fun stringDistance(candidate: CharSequence, pattern: CharSequence, maxOffset: In
                 longestCommonSubsequence += localCommonSubstring
                 localCommonSubstring = 0
 
+                // Move the indices to a common point, simplifying the synchronization logic
                 if (iCandidate != iPattern) {
-                    // Using max to bypass the need for computer transpositions ("ab" vs "ba")
                     val iMax = Math.max(iCandidate, iPattern)
                     iCandidate = iMax
                     iPattern = iMax
@@ -42,25 +42,12 @@ fun stringDistance(candidate: CharSequence, pattern: CharSequence, maxOffset: In
                     }
                 }
 
-                searchWindow@
-                for (i in 0 until maxOffset) {
-                    when {
-                        (iCandidate + i) < candidateLength -> {
-                            if (candidate[iCandidate + i] == pattern[iPattern]) {
-                                iCandidate += i
-                                localCommonSubstring++
-                                break@searchWindow
-                            }
-                        }
-                        (iPattern + i) < patternLength -> {
-                            if (candidate[iCandidate] == pattern[iPattern + i]) {
-                                iPattern += i
-                                localCommonSubstring++
-                                break@searchWindow
-                            }
-                        }
-                        else -> break@searchWindow
-                    }
+                // Extracted the search logic into a helper function
+                val matchOffset = findMatchOffset(candidate, pattern, iCandidate, iPattern, maxOffset)
+                if (matchOffset != null) {
+                    iCandidate = matchOffset.first
+                    iPattern = matchOffset.second
+                    localCommonSubstring++
                 }
             }
 
@@ -71,6 +58,38 @@ fun stringDistance(candidate: CharSequence, pattern: CharSequence, maxOffset: In
         longestCommonSubsequence += localCommonSubstring
         Math.max(candidateLength, patternLength) - longestCommonSubsequence
     }
+}
+
+/**
+ * Helper function to find the offset for matching characters within the search window.
+ * Returns a pair of new indices (iCandidate, iPattern) if a match is found, or null if no match is found.
+ */
+private fun findMatchOffset(
+    candidate: CharSequence,
+    pattern: CharSequence,
+    iCandidate: Int,
+    iPattern: Int,
+    maxOffset: Int
+): Pair<Int, Int>? {
+    var result: Pair<Int, Int>? = null
+    var foundMatch = false
+
+    for (i in 0 until maxOffset) {
+        if (!foundMatch && (iCandidate + i) < candidate.length && candidate[iCandidate + i] == pattern[iPattern]) {
+            result = Pair(iCandidate + i, iPattern)
+            foundMatch = true
+        } else if (!foundMatch && (iPattern + i) < pattern.length && candidate[iCandidate] == pattern[iPattern + i]) {
+            result = Pair(iCandidate, iPattern + i)
+            foundMatch = true
+        }
+
+        // Exit loop if a match was found, no need for further iterations
+        if (foundMatch) {
+            break
+        }
+    }
+
+    return result
 }
 
 /** Checks whether the candidate contains the pattern in order. */

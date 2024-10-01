@@ -220,8 +220,8 @@ private fun patch(sourceText: String, change: TextDocumentContentChangeEvent): S
     writer.write(change.text)
 
     // Skip replaced text
-    for (i in 0 until (range.end.line - range.start.line)) {
-        reader.readLine()
+    for (character in 0 until range.end.character) {
+        reader.read()
     }
     if (range.start.line == range.end.line) {
         reader.skip((range.end.character - range.start.character).toLong())

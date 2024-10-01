@@ -83,20 +83,23 @@ private fun findLocalArtifactDirUsingMaven(group: String, artifact: String) =
         ?.existsOrNull(), "Maven")
 
 private fun findLocalArtifactDirUsingGradle(group: String, artifact: String) =
-    LocalArtifactDirectoryResolution(gradleCaches
-        ?.resolve(group)
+    LocalArtifactDirectoryResolution(gradleCaches.resolve(group)
         ?.resolve(artifact)
         ?.existsOrNull(), "Gradle")
 
 
-// TODO: Resolve the gradleCaches dynamically instead of hardcoding this path
 private val gradleCaches by lazy {
     gradleHome.resolve("caches")
         .resolveStartingWith("modules")
         .resolveStartingWith("files")
 }
 
-private fun Path.resolveStartingWith(prefix: String) = Files.list(this).filter { it.fileName.toString().startsWith(prefix) }.findFirst().orElse(null)
+private fun Path.resolveStartingWith(prefix: String): Path {
+    return Files.list(this)
+        .filter { Files.isDirectory(it) && it.fileName.toString().startsWith(prefix) }
+        .findFirst()
+        .orElseThrow { IllegalStateException("Directory starting with $prefix not found in $this") }
+}
 
 private fun compareVersions(left: Path, right: Path): Int {
     val leftVersion = extractVersion(left)

@@ -1,5 +1,7 @@
 package org.javacs.kt
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.async
 import org.javacs.kt.classpath.ClassPathEntry
 import org.javacs.kt.classpath.defaultClassPathResolver
 import org.javacs.kt.compiler.Compiler
@@ -52,35 +54,43 @@ class CompilerClassPath(
         updateBuildScriptClassPath: Boolean = true,
         updateJavaSourcePath: Boolean = true
     ): Boolean {
-        // TODO: Fetch class path and build script class path concurrently (and asynchronously)
         val resolver = defaultClassPathResolver(workspaceRoots, databaseService.db)
         var refreshCompiler = updateJavaSourcePath
 
-        if (updateClassPath) {
-            val newClassPath = resolver.classpathOrEmpty
-            if (newClassPath.entries != classPath) {
-                synchronized(classPath) {
-                    syncPaths(classPath, newClassPath.entries, "class path") { it.compiledJar }
+        runBlocking {
+            val classPathDeferred = async {
+                if (updateClassPath) {
+                    val newClassPath = resolver.classpathOrEmpty
+                    if (newClassPath.entries != classPath) {
+                        synchronized(classPath) {
+                            syncPaths(classPath, newClassPath.entries, "class path") { it.compiledJar }
+                        }
+                        classpathCached = newClassPath.cacheHit
+                        refreshCompiler = true
+                    }
+
+                    async.compute {
+                        val newClassPathWithSources = resolver.classpathWithSources
+                        synchronized(classPath) {
+                            syncPaths(classPath, newClassPathWithSources.entries, "class path with sources") { it.compiledJar }
+                        }
+                    }
                 }
-                classpathCached = newClassPath.cacheHit
-                refreshCompiler = true
             }
 
-            async.compute {
-                val newClassPathWithSources = resolver.classpathWithSources
-                synchronized(classPath) {
-                    syncPaths(classPath, newClassPathWithSources.entries, "class path with sources") { it.compiledJar }
+            val buildScriptClassPathDeferred = async {
+                if (updateBuildScriptClassPath) {
+                    LOG.info("Update build script path")
+                    val newBuildScriptClassPath = resolver.buildScriptClasspathOrEmpty
+                    if (newBuildScriptClassPath != buildScriptClassPath) {
+                        syncPaths(buildScriptClassPath, newBuildScriptClassPath, "build script class path") { it }
+                        refreshCompiler = true
+                    }
                 }
             }
-        }
 
-        if (updateBuildScriptClassPath) {
-            LOG.info("Update build script path")
-            val newBuildScriptClassPath = resolver.buildScriptClasspathOrEmpty
-            if (newBuildScriptClassPath != buildScriptClassPath) {
-                syncPaths(buildScriptClassPath, newBuildScriptClassPath, "build script class path") { it }
-                refreshCompiler = true
-            }
+            classPathDeferred.await()
+            buildScriptClassPathDeferred.await()
         }
 
         if (refreshCompiler) {

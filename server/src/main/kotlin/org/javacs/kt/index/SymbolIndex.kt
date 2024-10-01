@@ -1,6 +1,7 @@
 package org.javacs.kt.index
 
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
@@ -107,8 +108,7 @@ class SymbolIndex(
                     addDeclarations(allDescriptors(module, exclusions))
 
                     val finished = System.currentTimeMillis()
-                    val count = Symbols.slice(Symbols.fqName.count()).selectAll().first()[Symbols.fqName.count()]
-                    LOG.info("Updated full symbol index in ${finished - started} ms! (${count} symbol(s))")
+                    LOG.info("Updated full symbol index in ${finished - started} ms!")
                 }
             } catch (e: Exception) {
                 LOG.error("Error while updating symbol index")
@@ -130,8 +130,7 @@ class SymbolIndex(
                 addDeclarations(add)
 
                 val finished = System.currentTimeMillis()
-                val count = Symbols.slice(Symbols.fqName.count()).selectAll().first()[Symbols.fqName.count()]
-                LOG.info("Updated symbol index in ${finished - started} ms! (${count} symbol(s))")
+                LOG.info("Updated symbol index in ${finished - started} ms!")
             }
         } catch (e: Exception) {
             LOG.error("Error while updating symbol index")

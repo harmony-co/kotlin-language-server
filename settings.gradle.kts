@@ -20,7 +20,7 @@ pluginManagement {
         id("application") apply false
         id("maven-publish") apply false
 
-        kotlin("jvm") version "1.8.10" apply false
+        kotlin("jvm") version "2.0.20" apply false // Updated version here
         id("com.github.jk1.tcdeps") version "1.2" apply false
         id("com.jaredsburrows.license") version "0.8.42" apply false
     }

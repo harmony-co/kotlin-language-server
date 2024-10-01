@@ -6,9 +6,9 @@ javaPlatform {
     allowDependencies()
 }
 
-val kotlinVersion = "1.9.22"
-val exposedVersion = "0.37.3"
-val lsp4jVersion = "0.21.2"
+val kotlinVersion = "2.0.20"
+val exposedVersion = "0.55.0"
+val lsp4jVersion = "0.23.1"
 
 // constrain the dependencies that we use to these specific versions
 dependencies {
