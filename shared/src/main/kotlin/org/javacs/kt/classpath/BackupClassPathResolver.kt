@@ -9,6 +9,7 @@ import java.util.function.BiPredicate
 import kotlin.math.min
 import org.javacs.kt.util.findCommandOnPath
 import org.javacs.kt.util.tryResolving
+import org.javacs.kt.LOG
 
 /** Backup classpath that find Kotlin in the user's Maven/Gradle home or kotlinc's libraries folder. */
 object BackupClassPathResolver : ClassPathResolver {
@@ -37,9 +38,11 @@ private fun tryFindingLocalArtifactUsing(@Suppress("UNUSED_PARAMETER") group: St
             else -> name.startsWith(artifact) && ("-sources" !in name) && name.endsWith(".jar")
         }
     }
-    return Files.list(artifactDirResolution.artifactDir)
+    val versions = Files.list(artifactDirResolution.artifactDir)
         .sorted(::compareVersions)
-        .findFirst()
+    LOG.info("Looking for $artifact in $artifactDirResolution")
+    LOG.info("Versions found: ${versions.toList()}")
+    return versions.findFirst()
         .orElse(null)
         ?.let { Files.find(artifactDirResolution.artifactDir, 3, isCorrectArtifact).findFirst().orElse(null) }
 }
