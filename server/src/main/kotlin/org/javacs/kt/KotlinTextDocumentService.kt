@@ -154,7 +154,7 @@ class KotlinTextDocumentService(
         reportTime {
             LOG.info("Completing at {}", describePosition(position))
 
-            val (file, cursor) = recover(position, Recompile.NEVER) ?: return@compute Either.forRight(CompletionList()) // TODO: Investigate when to recompile
+            val (file, cursor) = recover(position, Recompile.ALWAYS) ?: return@compute Either.forRight(CompletionList()) // TODO: Investigate when to recompile
             val completions = completions(file, cursor, sp.index, config.completion)
             LOG.info("Found {} items", completions.items.size)
 

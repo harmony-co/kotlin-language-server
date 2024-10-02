@@ -76,6 +76,7 @@ fun completions(file: CompiledFile, cursor: Int, index: SymbolIndex, config: Com
     )
     val itemList = items
         .take(MAX_COMPLETION_ITEMS)
+        .sortedBy { if (it.kind == CompletionItemKind.Field) 0 else 1 }
         .toList()
         .onEachIndexed { i, item -> item.sortText = i.toString().padStart(2, '0') }
     val isIncomplete = itemList.size >= MAX_COMPLETION_ITEMS || elementItemList.isEmpty()
