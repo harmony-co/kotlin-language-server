@@ -6,9 +6,10 @@ javaPlatform {
     allowDependencies()
 }
 
-val kotlinVersion = "2.0.20"
+val kotlinVersion = "2.0.21"
 val exposedVersion = "0.55.0"
 val lsp4jVersion = "0.23.1"
+val guavaVersion= "33.3.0-jre"
 
 // constrain the dependencies that we use to these specific versions
 dependencies {
@@ -38,6 +39,6 @@ dependencies {
         api("org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlinVersion")
         api("org.openjdk.jmh:jmh-generator-annprocess:1.20")
         api("org.xerial:sqlite-jdbc:3.41.2.1")
-        api("com.google.guava:guava:33.3.1-jre")
+        api("com.google.guava:guava:$guavaVersion")
     }
 }
