@@ -17,7 +17,6 @@ class SourceExclusions(
         ".git", ".hg", ".svn",                                                      // Version control systems
         ".idea", ".idea_modules", ".vs", ".vscode", ".code-workspace", ".settings", // IDEs
         "bazel-*", "bin", "build", "node_modules", "target",                        // Build systems
-        "kotlin-language-server",                                                   // Avoid recursion
     ) + when {
         !scriptsConfig.enabled -> listOf("*.kts")
         !scriptsConfig.buildScriptsEnabled -> listOf("*.gradle.kts")
