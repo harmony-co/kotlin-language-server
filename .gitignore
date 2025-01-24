@@ -16,6 +16,9 @@ build
 target
 out
 
+# Kotlin
+.kotlin
+
 # Python
 __pycache__
 
@@ -29,3 +32,4 @@ node_modules
 !.vscode/tasks.json
 !.vscode/settings.json
 *.vsix
+kls_database.db

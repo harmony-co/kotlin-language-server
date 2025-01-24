@@ -1,7 +1,7 @@
 package org.javacs.kt
 
 import org.hamcrest.Matchers.*
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 
 class InstanceMemberTest : SingleFileTestFixture("completions", "InstanceMember.kt") {
@@ -293,7 +293,7 @@ class EditCallTest : SingleFileTestFixture("completions", "EditCall.kt") {
         val labels = completions.items.map { it.label }
 
         assertThat(labels, hasItem(startsWith("println")))
-        assertThat(completions.items.find { it.label.startsWith("println") }, hasProperty("insertText", equalTo("println")))
+        assertThat(completions.items.find { it.label.startsWith("println") }, hasProperty("insertText", equalTo("println(\${1:message})")))
     }
 }
 

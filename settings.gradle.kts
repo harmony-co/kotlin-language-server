@@ -3,28 +3,6 @@ pluginManagement {
         gradlePluginPortal()
         maven("https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin")
     }
-
-    // Centralize plugin versions.
-    // Ensure these plugins use the same version from the /gradle/platform/build.gradle.kts
-    // otherwise you'll get an exception during Gradle's configuration phase
-    // stating that the plugin with the specified (or unspecified) version
-    // cannot be found.
-    //
-    // Once declared here, subsequent plugin blocks in the build don't require
-    // a version to be applied. They inherit the versions from the following
-    // block.
-    //
-    // This can be verified by running the dependencies task via
-    // ./gradlew dependencies
-    plugins {
-        id("application") apply false
-        id("maven-publish") apply false
-
-        kotlin("jvm") version "2.0.20" apply false // Updated version here
-        id("com.github.jk1.tcdeps") version "1.2" apply false
-        id("com.jaredsburrows.license") version "0.8.42" apply false
-        id("com.google.guava") version "33.3.1-jre" apply false
-    }
 }
 
 rootProject.name = "kotlin-language-server"

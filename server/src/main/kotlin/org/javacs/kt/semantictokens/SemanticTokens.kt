@@ -165,7 +165,7 @@ private fun elementToken(element: PsiElement, bindingContext: BindingContext): S
             val identifierRange = element.nameIdentifier?.let { range(file.text, it.textRange) } ?: return null
             val modifiers = mutableSetOf(SemanticTokenModifier.DECLARATION)
 
-            if (isReadOnly(element)) {
+            if (element is KtVariableDeclaration && (!element.isVar || element.hasModifier(KtTokens.CONST_KEYWORD)) || element is KtParameter) {
                 modifiers.add(SemanticTokenModifier.READONLY)
             }
 
@@ -181,6 +181,9 @@ private fun elementToken(element: PsiElement, bindingContext: BindingContext): S
             SemanticToken(elementRange, SemanticTokenType.INTERPOLATION_ENTRY)
         is PsiLiteralExpression -> {
             val tokenType = when (element.type) {
+                PsiTypes.intType(), PsiTypes.longType(), PsiTypes.doubleType() -> SemanticTokenType.NUMBER
+                PsiTypes.charType() -> SemanticTokenType.STRING
+                PsiTypes.booleanType(), PsiTypes.nullType() -> SemanticTokenType.KEYWORD
                 PsiTypes.intType(), PsiTypes.longType(), PsiTypes.doubleType() -> SemanticTokenType.NUMBER
                 PsiTypes.charType() -> SemanticTokenType.STRING
                 PsiTypes.booleanType(), PsiTypes.nullType() -> SemanticTokenType.KEYWORD

@@ -2,8 +2,8 @@ plugins {
     kotlin("jvm")
     id("maven-publish")
     id("application")
-    id("com.github.jk1.tcdeps")
-    id("com.jaredsburrows.license")
+    alias(libs.plugins.com.github.jk1.tcdeps)
+    alias(libs.plugins.com.jaredsburrows.license)
     id("kotlin-language-server.publishing-conventions")
     id("kotlin-language-server.distribution-conventions")
     id("kotlin-language-server.kotlin-conventions")
@@ -19,13 +19,13 @@ application {
     mainClass.set(serverMainClassName)
     description = "Code completions, diagnostics and more for Kotlin"
     applicationDefaultJvmArgs = listOf("-DkotlinLanguageServer.version=$version")
+    applicationDistribution.into("bin") { filePermissions { unix("755".toInt(radix = 8)) } }
 }
 
 repositories {
     maven(url = "https://repo.gradle.org/gradle/libs-releases")
-    maven { url = uri("$projectDir/lib") }
-    maven(uri("$projectDir/lib"))
     maven("https://jitpack.io")
+    maven(url = "https://www.jetbrains.com/intellij-repository/releases")
     mavenCentral()
 }
 
@@ -34,55 +34,52 @@ dependencies {
     // Implementation dependencies: libraries required for your application
     implementation(platform(project(":platform")))
     implementation(project(":shared"))
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j")
-    implementation("org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc")
+
+    implementation(libs.org.eclipse.lsp4j.lsp4j)
+    implementation(libs.org.eclipse.lsp4j.jsonrpc)
+
     implementation(kotlin("compiler"))
     implementation(kotlin("scripting-compiler"))
     implementation(kotlin("scripting-jvm-host-unshaded"))
     implementation(kotlin("sam-with-receiver-compiler-plugin"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains:fernflower")
-    implementation("org.jetbrains.exposed:exposed-core")
-    implementation("org.jetbrains.exposed:exposed-dao")
-    implementation("org.jetbrains.exposed:exposed-jdbc")
-    implementation("com.h2database:h2")
-    implementation("com.github.fwcd.ktfmt:ktfmt")
-    implementation("com.beust:jcommander")
-    implementation("org.xerial:sqlite-jdbc")
+    implementation(libs.com.jetbrains.intellij.java.decompiler)
+    implementation(libs.org.jetbrains.exposed.core)
+    implementation(libs.org.jetbrains.exposed.dao)
+    implementation(libs.org.jetbrains.exposed.jdbc)
+    implementation(libs.com.h2database.h2)
+    implementation(libs.com.github.fwcd.ktfmt)
+    implementation(libs.com.beust.jcommander)
+    implementation(libs.org.xerial.sqlite.jdbc)
 
-    // Test dependencies: libraries required for testing
-    testImplementation("org.hamcrest:hamcrest-all")
-    testImplementation("junit:junit")
-    testImplementation("org.openjdk.jmh:jmh-core")
+    testImplementation(libs.hamcrest.all)
+    testImplementation(libs.junit.junit)
+    testImplementation(libs.org.openjdk.jmh.core)
 
-    // Compile-only dependencies: libraries needed at compile time only
-    // See https://github.com/JetBrains/kotlin/blob/65b0a5f90328f4b9addd3a10c6f24f3037482276/libraries/examples/scripting/jvm-embeddable-host/build.gradle.kts#L8
+    // See
+    // https://github.com/JetBrains/kotlin/blob/65b0a5f90328f4b9addd3a10c6f24f3037482276/libraries/examples/scripting/jvm-embeddable-host/build.gradle.kts#L8
     compileOnly(kotlin("scripting-jvm-host"))
 
     // Test compile-only dependencies
     testCompileOnly(kotlin("scripting-jvm-host"))
 
-    // Annotation processors: libraries used for annotation processing
-    annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess")
+    annotationProcessor(libs.org.openjdk.jmh.generator.annprocess)
 }
 
+configurations.forEach { config -> config.resolutionStrategy { preferProjectModules() } }
 
-configurations.forEach { config ->
-    config.resolutionStrategy {
-        preferProjectModules()
-    }
-}
-
-tasks.startScripts {
-    applicationName = "kotlin-language-server"
-}
+tasks.startScripts { applicationName = "kotlin-language-server" }
 
 tasks.register<Exec>("fixFilePermissions") {
     group = "Distribution"
     description = "Fix file permissions for the start script on macOS or Linux."
 
     onlyIf { !System.getProperty("os.name").lowercase().contains("windows") }
-    commandLine("chmod", "+x", "${tasks.installDist.get().destinationDir}/bin/kotlin-language-server")
+    commandLine(
+        "chmod",
+        "+x",
+        "${tasks.installDist.get().destinationDir}/bin/kotlin-language-server",
+    )
 }
 
 tasks.register<JavaExec>("debugRun") {
@@ -94,9 +91,7 @@ tasks.register<JavaExec>("debugRun") {
     standardInput = System.`in`
 
     jvmArgs(debugArgs)
-    doLast {
-        println("Using debug port $debugPort")
-    }
+    doLast { println("Using debug port $debugPort") }
 }
 
 tasks.register<CreateStartScripts>("debugStartScripts") {
@@ -125,10 +120,6 @@ tasks.withType<Test>() {
     }
 }
 
-tasks.installDist {
-    finalizedBy("fixFilePermissions")
-}
+tasks.installDist { finalizedBy("fixFilePermissions") }
 
-tasks.build {
-    finalizedBy("installDist")
-}
+tasks.build { finalizedBy("installDist") }
